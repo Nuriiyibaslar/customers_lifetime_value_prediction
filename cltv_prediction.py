@@ -60,6 +60,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 # Normally, when calculating quarter values, 25% and 75% th values are calculated
 # but for this dataset, we have defined the quartile values as 0.01 and 0.99 to the function
+# Because we checked all observation units corresponding to percentiles
 
 def outlier_thresholds(dataframe,variable):
 	quartile1 = dataframe[variable].quantile(0.01) # quartile values are calculated
@@ -128,7 +129,7 @@ df["TotalPrice"] = df["Quantity"] * df["Price"]
 
 today_date = dt.datetime(2011, 12, 11)
 
-# We determined the day the analysis was made, in fact, we can't put history into this day again.
+# We determined the day the analysis was made, in fact, we can't put its date into this day again.
 
 
 #########################
@@ -149,8 +150,6 @@ today_date = dt.datetime(2011, 12, 11)
 # Repeat means that the customer has come and shopped for at least the second time and is now our customer.
 # we will be performing the calculation.
 # monetary: average earnings per purchase
-
-# The frequency, monetary and recency values that appear here are different from the mathematical calculations I've seen before, this is an issue that needs attention.
 
 cltv_df = df.groupby("Customer ID").agg({"InvoiceDate" : [lambda InvoiceDate : (InvoiceDate.max() - InvoiceDate.min()).days,
                                                           lambda InvoiceDate : (today_date - InvoiceDate.min()).days],
@@ -178,8 +177,8 @@ cltv_df["T"] = cltv_df["T"] /7
 ############
 
 bgf = BetaGeoFitter(penalizer_coef=0.001)
-# When you give me the frequency, recency and customer age values of the fit method via the model object, it says I will have installed this model. Here gamma and beta distributions
-# is used. While finding the parameters here, the maximum likelihood method will be used. And while I can find the parameters, I need an argument says BetaGeoFitter
+
+# While finding the parameters here, the maximum likelihood method will be used. And while I can find the parameters, I need an argument says BetaGeoFitter
 # penalizer_coef=0.001 : It is the penalty coefficient that will be applied to the coefficients at the stage of finding the parameters of this model.
 # What we need to know within the scope of our topic is that the BGNBD Model provides us with the maximum likelihood method to find the parameters of the beta and gamma distributions and to make an estimation.
 # creates this model.
@@ -190,9 +189,6 @@ bgf.fit(cltv_df["frequency"],
         cltv_df["recency"],
         cltv_df["T"])
 
-# lifetimes.BetaGeoFitter: fitted with 2845 subjects, a: 0.12, alpha: 11.41, b: 2.49, r: 2.18>
-# If we enter the crm business in a long-term way and we will continue to work on BGNBD and Gamma, how to ensure the optimum values of these parameters
-# details should be entered. More serious focus is required.
 
 ##############
 # Who are the 10 customers we expect to purchase the most in 1 week?
